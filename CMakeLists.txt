@@ -6,11 +6,12 @@ set(TARGET_NAME "app")
 set(BIN_DIR ${CMAKE_SOURCE_DIR}/build/bin/${CMAKE_BUILD_TYPE})
 project(${PROJECT_NAME})
 
+
 ######### TARGET RULES #########
 
 # Main project files
-set(INC_DIR code)
-set(SRC_DIR code)
+set(INC_DIR code/printf)
+set(SRC_DIR code/printf)
 file(GLOB_RECURSE SRC_LIST
      "${SRC_DIR}/*.c"
 	 "${INC_DIR}/*.h")
@@ -20,7 +21,8 @@ add_executable(${TARGET_NAME} ${SRC_LIST})
 set_target_properties(${TARGET_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY_DEBUG ${BIN_DIR}
     RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR}
-    RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${BIN_DIR})
+    RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${BIN_DIR}
+    C_STANDARD 11)
 
 # Includes
 target_include_directories(${TARGET_NAME} PRIVATE ${INC_DIR})
