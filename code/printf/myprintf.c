@@ -30,12 +30,16 @@ size_t count_number_of_arguments(const char* format) {
 			continue;
 		}
 
-		// Ignore '%%'
 		if (is_format(it, 'c') || 
 			is_format(it, 'd') || 
-			is_format(it, 'f') ||
-			is_format(it, 's') ) {
+			is_format(it, 'f') ) {
 			counted_args++;
+			it += 2;
+			continue;
+		}
+
+		// Ignore '%%'
+		if (is_format(it, '%')) {
 			it += 2;
 			continue;
 		}
@@ -51,18 +55,19 @@ size_t count_number_of_arguments(const char* format) {
 }
 
 enum {
-	MAX_FORMATED_ARG_LENGTH = (MAX_INT32_LENGTH > MAX_F32_LENGTH)?MAX_INT32_LENGTH:MAX_F32_LENGTH
+	// + 1 for \0
+	MAX_FORMATED_ARG_LENGTH = (MAX_INT32_LENGTH > MAX_F32_LENGTH)?MAX_INT32_LENGTH:MAX_F32_LENGTH + 1
 };
 
 typedef struct Formated_Argument_ {
 	size_t offset_in_format;
-	union {
-		char dummy[MAX_FORMATED_ARG_LENGTH];
-		const char* string;
-	} result;
-
+	char string[MAX_FORMATED_ARG_LENGTH];
 } Formated_Argument;
 
+// 1. Iterate over entire format
+// 2. Confirm that num of % = num of varargs
+// 3. Parse varargs
+// 4. Create the string
 int my_printf(const char* restrict format, size_t num_va_args, ...) {
 	assert(format);
 
@@ -79,17 +84,59 @@ int my_printf(const char* restrict format, size_t num_va_args, ...) {
 		return -1;
 	}
 
+	// msvc doesn't support VLA because reasons
+#ifdef _MSC_VER
+	Formated_Argument* formated_arguments = _alloca(num_va_args*sizeof(Formated_Argument));
+#else
 	Formated_Argument formated_arguments[num_va_args];
+#endif
 
 	va_list args;
 	va_start(args, num_va_args);
 
+	const char* it = format;
+	size_t current_arg_idx = 0;
+
+	while(*it) {
+		if (*it != '%') {
+			it++;
+			continue;
+		} 
+
+		char* arg_string = formated_arguments[current_arg_idx].string;
+		// We ignore %% here as well
+		if (is_format(it, 'c')) {
+			char arg_raw = (char)va_arg(args, int);
+
+			arg_string[0] = arg_raw;
+			arg_string[1] = '\0';
+		} else if (is_format(it, 'd')) {
+			int arg_raw = va_arg(args, int);
+
+			int written = int_to_string(arg_raw, arg_string);
+			if (written == 0) {
+				strcpy_s(arg_string, MAX_FORMATED_ARG_LENGTH,"<error>");
+			}
+		} else if (is_format(it, 'f')) {
+			float arg_raw = (float)va_arg(args, double);
+
+			int written = float_to_string(arg_raw, arg_string);
+			if (written == 0) {
+				strcpy_s(arg_string, MAX_FORMATED_ARG_LENGTH, "<error>");
+			}
+		}
+		
+		formated_arguments[current_arg_idx].offset_in_format = (size_t)it - (size_t)format;
+		current_arg_idx++;
+		it += 2;
+	}
+
 	va_end(args);
 
-	// 1. Iterate over entire format
-	// 2. Confirm that num of % = num of varargs
-	// 3. Generate varargs
-	// 4. Create the string
+	printf("\n -> Formated %llu args.\n", num_va_args);
+	for (int i = 0; i < num_va_args; i++) {
+		printf("%d. Position: %llu. \"%s\"\n", i + 1, formated_arguments[i].offset_in_format, formated_arguments[i].string);
+	}
 
 	return 0;
 }

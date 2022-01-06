@@ -7,7 +7,7 @@
 /*
  * Formats and writes a string to stdout.
  *
- * @param[in] format - string with following specifiers: %d -- int32_t, %f -- float, %c -- int8_t/char, %s -- NULL-terminated string
+ * @param[in] format - string with following specifiers: %d -- int32_t, %f -- float, %c -- int8_t/char
  * @param[in] num_va_args - number of arguments specified in "format" and passed in va_args
  * @return number of characters transmitted to the output stream or negative value if an output error or an encoding error (for string and character conversion specifiers) occurred
 */
