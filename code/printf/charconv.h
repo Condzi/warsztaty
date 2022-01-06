@@ -7,8 +7,8 @@
 enum {
 	// -2147483648 => 11 characters
 	MAX_INT32_LENGTH = 11,
-	// sign + decimal + . + mantissa
-	MAX_F32_LENGTH = 1 + FLT_DECIMAL_DIG + 1 + FLT_DIG
+	// FLT_MAX length
+	MAX_F32_LENGTH = 40
 };
 
 /*

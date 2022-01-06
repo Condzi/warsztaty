@@ -9,18 +9,16 @@
 int int_to_string(int32_t value, char* buffer) {
 	assert(buffer);
 
-	// Workaround for INT32_MIN, pt. 1/2
-	const int32_t preserve = value;
-	if (value == INT32_MIN) value = INT32_MAX;
-
 	bool has_sign = false;
-	if (preserve < 0) {
+	if (value < 0) {
 		has_sign = true;	
-		value = -value;
 	}
 
+	// To handle INT_MIN
+	const uint32_t absolute = (uint32_t)llabs((int64_t)value);
+
 	int num_of_digits = 0;
-	int32_t temp = value;
+	uint32_t temp = absolute;
 	do {
 		temp /= 10;
 		num_of_digits++;
@@ -34,7 +32,7 @@ int int_to_string(int32_t value, char* buffer) {
 	}
 
 	int chars_to_write = num_of_digits + (int)has_sign;
-	temp = value;
+	temp = absolute;
 	for (int i = chars_to_write - 1; i >= 0; i--) {
 		buffer[i] = temp%10 + '0';
 		temp /= 10;
@@ -42,11 +40,6 @@ int int_to_string(int32_t value, char* buffer) {
 
 	if (has_sign) {
 		buffer[0] = '-';
-	}
-
-	// Workaround for INT32_MIN, pt. 2/2
-	if (preserve == INT32_MIN) {
-		buffer[chars_to_write - 1] += 1;
 	}
 
 	buffer[chars_to_write] = '\0';
