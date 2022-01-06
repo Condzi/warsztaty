@@ -9,15 +9,12 @@
 int int_to_string(int32_t value, char* buffer) {
 	assert(buffer);
 
-	bool has_sign = false;
-	if (value < 0) {
-		has_sign = true;	
-	}
+	const bool has_sign = value < 0;
 
 	// To handle INT_MIN
 	const uint32_t absolute = (uint32_t)llabs((int64_t)value);
 
-	int num_of_digits = 0;
+	size_t num_of_digits = 0;
 	uint32_t temp = absolute;
 	do {
 		temp /= 10;
@@ -31,9 +28,9 @@ int int_to_string(int32_t value, char* buffer) {
 		return 0;
 	}
 
-	int chars_to_write = num_of_digits + (int)has_sign;
+	size_t chars_to_write = num_of_digits + (int)has_sign;
 	temp = absolute;
-	for (int i = chars_to_write - 1; i >= 0; i--) {
+	for (size_t i = chars_to_write - 1; i < chars_to_write; i--) {
 		buffer[i] = temp%10 + '0';
 		temp /= 10;
 	}
@@ -51,7 +48,7 @@ int float_to_string(float value, char* buffer) {
 	assert(buffer);
 	
 	const int32_t exponent = (int32_t)value;
-	const int32_t mantissa = abs((int32_t)((value - (float)exponent) * powf(10, FLT_DIG)));
+	const int32_t mantissa = abs((int32_t)((value - (float)exponent)*powf(10, FLT_DIG)));
 
 	int chars_written = 0;
 
@@ -74,7 +71,7 @@ int float_to_string(float value, char* buffer) {
 	}
 
 	chars_written += result;
-	assert(chars_written < MAX_F32_LENGTH);
+	assert(chars_written <= MAX_F32_LENGTH);
 	if (chars_written > MAX_F32_LENGTH) {
 		REPORT_ERROR("chars_written > MAX_F32_LENGTH");
 		return 0;
