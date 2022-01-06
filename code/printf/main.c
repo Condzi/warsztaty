@@ -39,5 +39,5 @@ void test_my_printf() {
 
 	printf("\nPRINTF TEST -- COMBINED\n");
 	// @ToDo: handle %% as %c with % as argument! or something. 
-	my_printf("Test: %d, %f, %c, %d. Percent sign doesnt work yet :)\n", 4, 666, 21.37f, 'D', 997);
+	my_printf("Test: %d, %f, %c, %d. And finally, it works 100%% of the time :)\n", 4, 666, 21.37f, 'D', 997);
 }

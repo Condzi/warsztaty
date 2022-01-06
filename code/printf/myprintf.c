@@ -54,6 +54,23 @@ size_t count_number_of_arguments(const char* format) {
 	return counted_args;
 }
 
+size_t count_number_of_double_percents(const char* format) {
+	assert(format);
+	size_t count = 0;
+
+	const char* format_it = format;
+	while (*format_it) {
+		if (is_format(format_it, '%')) {
+			count++;
+			format_it += 2;
+		} else {
+			format_it++;
+		}
+	}
+
+	return count;
+}
+
 enum {
 	// + 1 for \0
 	MAX_FORMATED_ARG_LENGTH = (MAX_INT32_LENGTH > MAX_F32_LENGTH)?MAX_INT32_LENGTH:MAX_F32_LENGTH + 1
@@ -84,11 +101,13 @@ int my_printf(const char* restrict format, size_t num_va_args, ...) {
 		return -1;
 	}
 
+	const size_t total_arguments_to_parse = num_va_args + count_number_of_double_percents(format);
+
 	// msvc doesn't support VLA because reasons
 #ifdef _MSC_VER
-	Formated_Argument* formated_arguments = _alloca(num_va_args*sizeof(Formated_Argument));
+	Formated_Argument* formated_arguments = _alloca(total_arguments_to_parse*sizeof(Formated_Argument));
 #else
-	Formated_Argument formated_arguments[num_va_args];
+	Formated_Argument formated_arguments[total_arguments_to_parse];
 #endif
 
 	va_list args;
@@ -107,14 +126,14 @@ int my_printf(const char* restrict format, size_t num_va_args, ...) {
 		char* arg_string = formated_arguments[current_arg_idx].string;
 		// We ignore %% here as well
 		if (is_format(format_it, 'c')) {
-			char arg_raw = (char)va_arg(args, int);
+			const char arg_raw = (char)va_arg(args, int);
 
 			arg_string[0] = arg_raw;
 			arg_string[1] = '\0';
 
 			length_of_all_strings_used_for_agruments += 1;
 		} else if (is_format(format_it, 'd')) {
-			int arg_raw = va_arg(args, int);
+			const int arg_raw = va_arg(args, int);
 
 			int written = int_to_string(arg_raw, arg_string);
 			if (written == 0) {
@@ -124,7 +143,7 @@ int my_printf(const char* restrict format, size_t num_va_args, ...) {
 
 			length_of_all_strings_used_for_agruments += written;
 		} else if (is_format(format_it, 'f')) {
-			float arg_raw = (float)va_arg(args, double);
+			const float arg_raw = (float)va_arg(args, double);
 
 			int written = float_to_string(arg_raw, arg_string);
 			if (written == 0) {
@@ -133,7 +152,11 @@ int my_printf(const char* restrict format, size_t num_va_args, ...) {
 			}
 
 			length_of_all_strings_used_for_agruments += written;
-		}
+		} else if (is_format(format_it, '%')) {
+			arg_string[0] = '%';
+			arg_string[1] = '\0';
+			length_of_all_strings_used_for_agruments++;
+		}	
 		
 		formated_arguments[current_arg_idx].offset_in_format = (size_t)format_it - (size_t)format;
 		current_arg_idx++;
@@ -149,7 +172,7 @@ int my_printf(const char* restrict format, size_t num_va_args, ...) {
 	}
 */
 
-	const size_t final_string_length = format_string_length - (num_va_args * 2) + 
+	const size_t final_string_length = format_string_length - (total_arguments_to_parse * 2) + 
 									   length_of_all_strings_used_for_agruments +
 									   1; // \0
 
@@ -162,18 +185,18 @@ int my_printf(const char* restrict format, size_t num_va_args, ...) {
 	char* position_in_final_string = final_string;
 
 	size_t last_position_in_format = 0;
-	for (int i = 0; i < num_va_args; i++) {
+	for (int i = 0; i < total_arguments_to_parse; i++) {
 		const size_t position_in_format = formated_arguments[i].offset_in_format;
 		const size_t length_to_copy = position_in_format - last_position_in_format;
 
-		// @ToDo: check for failure
+		// @ToDo: check for memcpy failure
 		if (last_position_in_format != position_in_format) {
 			memcpy(position_in_final_string, format + last_position_in_format, length_to_copy);
 		}
 
 		position_in_final_string += length_to_copy;
 
-		char* arg_string = formated_arguments[i].string;
+		const char* arg_string = formated_arguments[i].string;
 		const size_t arg_string_length = strlen(arg_string);
 		memcpy(position_in_final_string, arg_string, arg_string_length);
 		position_in_final_string += arg_string_length;
