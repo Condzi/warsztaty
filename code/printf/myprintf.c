@@ -25,7 +25,9 @@ enum {
 
 typedef struct Formated_Argument_ {
 	size_t offset_in_format;
-	char string[MAX_FORMATED_ARG_LENGTH];
+	char buffer[MAX_FORMATED_ARG_LENGTH];
+	const char* string;
+
 } Formated_Argument;
 
 /*
@@ -86,41 +88,36 @@ int my_printf(const char* restrict format, size_t num_va_args, ...) {
 			continue;
 		} 
 
-		char* arg_string = formated_arguments[current_arg_idx].string;
-		// We ignore %% here as well
+		char* arg_string_buffer = formated_arguments[current_arg_idx].buffer;
+		// In every case besides '%s', string points to the buffer, so we set it here to avoid
+		// redundant code.
+		formated_arguments[current_arg_idx].string = arg_string_buffer;
+
 		if (is_format(format_it, 'c')) {
 			const char arg_raw = (char)va_arg(args, int);
 
-			arg_string[0] = arg_raw;
-			arg_string[1] = '\0';
-
-			length_of_all_strings_used_for_agruments += 1;
+			arg_string_buffer[0] = arg_raw;
+			arg_string_buffer[1] = '\0';
 		} else if (is_format(format_it, 'd')) {
 			const int arg_raw = va_arg(args, int);
 
-			int written = int_to_string(arg_raw, arg_string);
-			if (written == 0) {
-				strcpy(arg_string, "<error>");
-				written = 7; 
+			if (int_to_string(arg_raw, arg_string_buffer) == 0) {
+				strcpy(arg_string_buffer, "<error>");
 			}
-
-			length_of_all_strings_used_for_agruments += written;
 		} else if (is_format(format_it, 'f')) {
 			const float arg_raw = (float)va_arg(args, double);
 
-			int written = float_to_string(arg_raw, arg_string);
-			if (written == 0) {
-				strcpy(arg_string, "<error>");
-				written = 7; 
+			if (float_to_string(arg_raw, arg_string_buffer) == 0) {
+				strcpy(arg_string_buffer, "<error>");
 			}
-
-			length_of_all_strings_used_for_agruments += written;
 		} else if (is_format(format_it, '%')) {
-			arg_string[0] = '%';
-			arg_string[1] = '\0';
-			length_of_all_strings_used_for_agruments++;
-		}	
+			arg_string_buffer[0] = '%';
+			arg_string_buffer[1] = '\0';
+		} else if (is_format(format_it, 's')) {
+			formated_arguments[current_arg_idx].string = va_arg(args, const char*);
+		}
 		
+		length_of_all_strings_used_for_agruments += strlen(formated_arguments[current_arg_idx].string);
 		formated_arguments[current_arg_idx].offset_in_format = (size_t)format_it - (size_t)format;
 		current_arg_idx++;
 		format_it += 2;
@@ -128,10 +125,11 @@ int my_printf(const char* restrict format, size_t num_va_args, ...) {
 
 	va_end(args);
 
+// Quick debug: print formatted arguments
 /*
-	printf("\n -> Formated %llu args.\n", num_va_args);
-	for (int i = 0; i < num_va_args; i++) {
-		printf("%d. Position: %llu. \"%s\"\n", i + 1, formated_arguments[i].offset_in_format, formated_arguments[i].string);
+	printf("\n -> Formated %llu args.\n", total_arguments_to_parse);
+	for (int i = 0; i < total_arguments_to_parse; i++) {
+		printf("  %d. Position: %llu. \"%s\"\n", i + 1, formated_arguments[i].offset_in_format, formated_arguments[i].string);
 	}
 */
 
@@ -159,9 +157,9 @@ int my_printf(const char* restrict format, size_t num_va_args, ...) {
 
 		position_in_final_string += length_to_copy;
 
-		const char* arg_string = formated_arguments[i].string;
-		const size_t arg_string_length = strlen(arg_string);
-		memcpy(position_in_final_string, arg_string, arg_string_length);
+		const char* arg_string_buffer = formated_arguments[i].string;
+		const size_t arg_string_length = strlen(arg_string_buffer);
+		memcpy(position_in_final_string, arg_string_buffer, arg_string_length);
 		position_in_final_string += arg_string_length;
 
 		// +1 to skip two chars instead of one in '%d' for example
@@ -217,7 +215,8 @@ size_t count_number_of_arguments(const char* format) {
 
 		if (is_format(format_it, 'c') || 
 			is_format(format_it, 'd') || 
-			is_format(format_it, 'f') ) {
+			is_format(format_it, 'f') ||
+			is_format(format_it, 's')) {
 			counted_args++;
 			format_it += 2;
 			continue;

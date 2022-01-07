@@ -10,8 +10,6 @@ void test_my_printf();
 
 
 // @ToDo:
-// - refactor UT
-// - add %s
 // - add docs
 
 int main(){
@@ -61,11 +59,12 @@ void test_my_printf() {
 		my_printf(" %c\n", 1, 'X');
 		my_printf(" %d\n", 1, 123);
 		my_printf(" %f\n", 1, 123.321f);
+		my_printf(" %s", 1, "a string\n");
 	}
 
 	puts("\ntest_my_printf: combined");
-	my_printf(" Test: %d, %f, %c, %d. And finally, it works 100%% of the time :)\n", 4, 666, 21.37f, 'D', 997);
+	my_printf(" Test: %d, %f, %c, %d. And finally, it works 100%% of the time %s!\n", 5, 666, 21.37f, 'D', 997, ":)");
 
 	puts("\ntest_my_printf: combined, using macro");
-	MY_PRINTF(" Test: %d, %f, %c, %d. And finally, it works 100%% of the time :)\n", 666, 21.37f, 'D', 997);
+	MY_PRINTF(" Test: %d, %f, %c, %d. And finally, it works 100%% of the time %s!\n", 666, 21.37f, 'D', 997, ":)");
 }
