@@ -49,12 +49,12 @@ int my_printf(const char* restrict format, size_t num_va_args, ...) {
 	if (num_va_args == 0) {
 #ifdef _MSC_VER
 		if (fputs(format, stdout) == EOF) {
-			REPORT_ERROR("call to fputs() faield");
+			REPORT_ERROR("call to fputs() failed");
 			return -1;
 		}
 #else
 		if (write(1, format, format_string_length) != format_string_length) {
-			REPORT_ERROR("call to write() faield");
+			REPORT_ERROR("call to write() failed");
 			return -1;
 		}
 #endif
@@ -175,7 +175,7 @@ int my_printf(const char* restrict format, size_t num_va_args, ...) {
 
 #ifdef _MSC_VER
 	if (fputs(final_string, stdout) == EOF) {
-		REPORT_ERROR("call to fputs() faield");
+		REPORT_ERROR("call to fputs() failed");
 		return -1;
 	}
 #else
