@@ -3,9 +3,6 @@
 
 #include "vargs_length.h"
 
-// _Printf_format_string_ 
-// https://docs.microsoft.com/en-us/cpp/code-quality/annotating-function-parameters-and-return-values?view=msvc-170#format-string-parameters
-
 /*
  * Formats and writes a string to stdout.
  *
