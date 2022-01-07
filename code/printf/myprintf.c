@@ -88,7 +88,7 @@ int my_printf(const char* restrict format, size_t num_va_args, ...) {
 
 			int written = int_to_string(arg_raw, arg_string);
 			if (written == 0) {
-				strcpy_s(arg_string, MAX_FORMATED_ARG_LENGTH, "<error>");
+				strcpy(arg_string, "<error>");
 				written = 7; 
 			}
 
@@ -98,7 +98,7 @@ int my_printf(const char* restrict format, size_t num_va_args, ...) {
 
 			int written = float_to_string(arg_raw, arg_string);
 			if (written == 0) {
-				strcpy_s(arg_string, MAX_FORMATED_ARG_LENGTH, "<error>");
+				strcpy(arg_string, "<error>");
 				written = 7; 
 			}
 
