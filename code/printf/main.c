@@ -32,6 +32,7 @@ void test_charconv() {
 void test_my_printf() {
 	printf("PRINTF TEST -- SIMPLE\n");
 
+	my_printf("(the next line fails on purpose)\n", 0);
 	my_printf("blah %%\n", 1);
 	my_printf("%c\n", 1, 'X');
 	my_printf("%d\n", 1, 123);

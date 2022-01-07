@@ -43,9 +43,15 @@ int my_printf(const char* restrict format, size_t num_va_args, ...) {
 		REPORT_ERROR("format string has length 0");
 		return -1;
 	}
-	// @ToDo: handle case when num_va_args == 0
-
-	// 1. Count arguments
+	
+	if (num_va_args == 0) {
+#ifdef _MSC_VER
+		return printf("%s", format);
+#else
+		write(1, format, format_string_length);
+		return format_string_length;
+#endif
+	}
 
 	if (count_number_of_arguments(format) != num_va_args) {
 		REPORT_ERROR("counted_args != num_va_args");
