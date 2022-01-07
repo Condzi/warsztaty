@@ -8,10 +8,6 @@
 void test_charconv();
 void test_my_printf();
 
-
-// @ToDo:
-// - add docs
-
 int main(){
 	test_charconv();
 	test_my_printf();
@@ -52,7 +48,7 @@ void test_charconv() {
 void test_my_printf() {
 	puts("\ntest_my_printf: simple");
 	{
-		my_printf(" (the next 4 lines fail on purpose)\n", 0);
+		my_printf(" (the next 5 lines fail on purpose)\n", 0);
 		my_printf(" blah %%\n", 1);
 		my_printf(" %\n", 1);
 		my_printf("%", 1);

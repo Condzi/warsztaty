@@ -11,7 +11,7 @@ int int_to_string(int32_t value, char* buffer) {
 
 	const bool has_sign = value < 0;
 
-	// To handle INT_MIN
+	// To handle INT32_MIN case we have to promote to int64_t and then take the abs
 	const uint32_t absolute = (uint32_t)llabs((int64_t)value);
 
 	size_t num_of_digits = 0;
@@ -47,14 +47,14 @@ int int_to_string(int32_t value, char* buffer) {
 int float_to_string(float value, char* buffer) {
 	assert(buffer);
 	
-	const int32_t exponent = (int32_t)value;
-	const int32_t mantissa = abs((int32_t)((value - (float)exponent)*powf(10, FLT_DIG)));
+	const int32_t integer = (int32_t)value;
+	const int32_t fraction = abs((int32_t)((value - (float)integer)*powf(10, FLT_DIG)));
 
 	int chars_written = 0;
 
-	int result = int_to_string(exponent, buffer);
+	int result = int_to_string(integer, buffer);
 	if (!result) {
-		REPORT_ERROR("Failed to convert exponent to string");
+		REPORT_ERROR("Failed to convert integer part to string");
 		return 0;
 	}
 
@@ -64,18 +64,18 @@ int float_to_string(float value, char* buffer) {
 	buffer++;
 	chars_written++;
 
-	result = int_to_string(mantissa, buffer);
-	if (!result) {
-		REPORT_ERROR("Failed to convert mantissa to string");
-		return 0;
-	}
-
-	chars_written += result;
-	assert(chars_written <= MAX_F32_LENGTH);
-	if (chars_written > MAX_F32_LENGTH) {
+	assert(chars_written + MAX_INT32_LENGTH <= MAX_F32_LENGTH);
+	if (chars_written + MAX_INT32_LENGTH > MAX_F32_LENGTH) {
 		REPORT_ERROR("chars_written > MAX_F32_LENGTH");
 		return 0;
 	}
 
+	result = int_to_string(fraction, buffer);
+	if (!result) {
+		REPORT_ERROR("Failed to convert fraction part to string");
+		return 0;
+	}
+
+	chars_written += result;
 	return chars_written;
 }
