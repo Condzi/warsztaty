@@ -46,7 +46,7 @@ int my_printf(const char* restrict format, size_t num_va_args, ...) {
 	
 	if (num_va_args == 0) {
 #ifdef _MSC_VER
-		if (fputs(stdout, format) == EOF) {
+		if (fputs(format, stdout) == EOF) {
 			REPORT_ERROR("call to fputs() faield");
 			return -1;
 		}
@@ -176,7 +176,7 @@ int my_printf(const char* restrict format, size_t num_va_args, ...) {
 	final_string[final_string_length - 1] = '\0';
 
 #ifdef _MSC_VER
-	if (fputs(stdout, final_string) == EOF) {
+	if (fputs(final_string, stdout) == EOF) {
 		REPORT_ERROR("call to fputs() faield");
 		return -1;
 	}
@@ -234,6 +234,10 @@ size_t count_number_of_arguments(const char* format) {
 			REPORT_ERROR("misplaced %% at the end of the format string");
 			return -1;
 		}
+
+		// If none of the above, it's just an unknown format
+		REPORT_ERROR("unknown format argument");
+		format_it += 2;
 	}
 
 	return counted_args;

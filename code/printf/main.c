@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <assert.h>
+#include <string.h>
 
 #include "charconv.h"
 #include "myprintf.h"
@@ -7,40 +8,64 @@
 void test_charconv();
 void test_my_printf();
 
+
+// @ToDo:
+// - refactor UT
+// - add %s
+// - add docs
+
 int main(){
+	test_charconv();
 	test_my_printf();
-	//test_charconv();
 }
 
 void test_charconv() {
-	char buffer[MAX_INT32_LENGTH + 1];
-	int iarr[] = {1234, -1234, INT32_MAX, INT32_MIN, 0, -0, 123};
-	for (int i = 0; i < sizeof(iarr)/sizeof(int); i++) {
-		int_to_string(iarr[i], buffer);
-		printf("int %d. '%s', expected '%d'\n", i + 1, buffer, iarr[i]);
+	#define ARRAY_LENGTH(x) sizeof(x)/sizeof(x[0])
+
+	puts("\ntest_charconv: int_to_string");
+	{
+		char buffer[MAX_INT32_LENGTH + 1];
+		const int test_input[] = {1234, -1234, INT32_MAX, INT32_MIN, 0, -0, 987654321};
+
+		for (int i = 0; i < ARRAY_LENGTH(test_input); i++) {
+			if (int_to_string(test_input[i], buffer) == 0) {
+				strcpy(buffer, "<error>");
+			}
+
+			printf(" input: \"%d\", result \"%s\"\n", test_input[i], buffer);
+		}
 	}
 
-	printf("\n\n");
-	float farr[] = {0, -1, 1, 21.37, -100.123456789, 123.321f};
-	char buffer2[MAX_F32_LENGTH + 1];
-	for (int i = 0; i < sizeof(farr)/sizeof(float); i++) {
-		float_to_string(farr[i], buffer2);
-		printf("float %d. '%s', expected '%f'\n", i + 1, buffer2, farr[i]);
+	puts("\n\ntest_charconv: float_to_string");
+	{
+		char buffer[MAX_F32_LENGTH + 1];
+		const float test_input[] = {0, -1, 1, 21.37, -100.123456789, 123.321f};
+
+		for (int i = 0; i < ARRAY_LENGTH(test_input); i++) {
+			if (float_to_string(test_input[i], buffer) == 0) {
+				strcpy(buffer, "<error>");
+			}
+
+			printf(" input: \"%f\", result \"%s\"\n", test_input[i], buffer);
+		}
 	}
 }
 
 void test_my_printf() {
-	printf("PRINTF TEST -- SIMPLE\n");
+	puts("\ntest_my_printf: simple");
+	{
+		my_printf(" (the next 4 lines fail on purpose)\n", 0);
+		my_printf(" blah %%\n", 1);
+		my_printf(" %\n", 1);
+		my_printf("%", 1);
+		my_printf(" %c\n", 1, 'X');
+		my_printf(" %d\n", 1, 123);
+		my_printf(" %f\n", 1, 123.321f);
+	}
 
-	my_printf("(the next line fails on purpose)\n", 0);
-	my_printf("blah %%\n", 1);
-	my_printf("%c\n", 1, 'X');
-	my_printf("%d\n", 1, 123);
-	my_printf("%f\n", 1, 123.321f);
+	puts("\ntest_my_printf: combined");
+	my_printf(" Test: %d, %f, %c, %d. And finally, it works 100%% of the time :)\n", 4, 666, 21.37f, 'D', 997);
 
-	printf("\nPRINTF TEST -- COMBINED\n");
-	my_printf("Test: %d, %f, %c, %d. And finally, it works 100%% of the time :)\n", 4, 666, 21.37f, 'D', 997);
-
-	printf("\nPRINTF TEST -- COMBINED (macro)\n");
-	MY_PRINTF("Test: %d, %f, %c, %d. And finally, it works 100%% of the time :)\n", 666, 21.37f, 'D', 997);
+	puts("\ntest_my_printf: combined, using macro");
+	MY_PRINTF(" Test: %d, %f, %c, %d. And finally, it works 100%% of the time :)\n", 666, 21.37f, 'D', 997);
 }
