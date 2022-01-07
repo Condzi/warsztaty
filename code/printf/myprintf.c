@@ -46,11 +46,17 @@ int my_printf(const char* restrict format, size_t num_va_args, ...) {
 	
 	if (num_va_args == 0) {
 #ifdef _MSC_VER
-		return printf("%s", format);
+		if (fputs(stdout, format) == EOF) {
+			REPORT_ERROR("call to fputs() faield");
+			return -1;
+		}
 #else
-		write(1, format, format_string_length);
-		return format_string_length;
+		if (write(1, format, format_string_length) != format_string_length) {
+			REPORT_ERROR("call to write() faield");
+			return -1;
+		}
 #endif
+		return format_string_length;
 	}
 
 	if (count_number_of_arguments(format) != num_va_args) {
@@ -170,10 +176,16 @@ int my_printf(const char* restrict format, size_t num_va_args, ...) {
 	final_string[final_string_length - 1] = '\0';
 
 #ifdef _MSC_VER
-	printf("%s", final_string);
+	if (fputs(stdout, final_string) == EOF) {
+		REPORT_ERROR("call to fputs() faield");
+		return -1;
+	}
 #else
 	// @ToDo: Test me
-	write(1, final_string, final_string_length);
+	if (write(1, final_string, final_string_length) != final_string_length) {
+		REPORT_ERROR("call to write() failed");
+		return -1;
+	}
 #endif
 
 	return final_string_length;
