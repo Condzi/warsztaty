@@ -10,66 +10,13 @@
 #include "myprintf.h"
 #include "report_error.h"
 
-bool is_format(const char* restrict format, char c) {
-	assert(format);
-	if (format[0] != '%') {
-		return false;
-	}
+/*
+		Internal stuff declaration
+*/
 
-	return format[0] == '%' && format[1] == c;
-}
-
-size_t count_number_of_arguments(const char* format) {
-	assert(format);
-
-	size_t counted_args = 0;
-	const char* format_it = format;
-	while (*format_it) {
-		if (*format_it != '%') {
-			format_it++;
-			continue;
-		}
-
-		if (is_format(format_it, 'c') || 
-			is_format(format_it, 'd') || 
-			is_format(format_it, 'f') ) {
-			counted_args++;
-			format_it += 2;
-			continue;
-		}
-
-		// Ignore '%%'
-		if (is_format(format_it, '%')) {
-			format_it += 2;
-			continue;
-		}
-
-		// Case when format looks like "Misplaced %"
-		if (is_format(format_it, '\0')) {
-			REPORT_ERROR("misplaced %% at the end of the format string");
-			return -1;
-		}
-	}
-
-	return counted_args;
-}
-
-size_t count_number_of_double_percents(const char* format) {
-	assert(format);
-	size_t count = 0;
-
-	const char* format_it = format;
-	while (*format_it) {
-		if (is_format(format_it, '%')) {
-			count++;
-			format_it += 2;
-		} else {
-			format_it++;
-		}
-	}
-
-	return count;
-}
+bool is_format(const char* restrict format, char c);
+size_t count_number_of_arguments(const char* format);
+size_t count_number_of_double_percents(const char* format);
 
 enum {
 	// + 1 for \0
@@ -80,6 +27,10 @@ typedef struct Formated_Argument_ {
 	size_t offset_in_format;
 	char string[MAX_FORMATED_ARG_LENGTH];
 } Formated_Argument;
+
+/*
+		Public functions definition
+*/
 
 // 1. Iterate over entire format
 // 2. Confirm that num of % = num of varargs
@@ -213,21 +164,76 @@ int my_printf(const char* restrict format, size_t num_va_args, ...) {
 	final_string[final_string_length - 1] = '\0';
 
 #ifdef _MSC_VER
-	puts(final_string);
+	printf("%s", final_string);
 #else
 	// @ToDo: Test me
-	write(1, final_string);
+	write(1, final_string, final_string_length);
 #endif
 
 	return final_string_length;
 }
 
-// position of types in format string -> convert va_args to string and store format_it -> insert in correct position in format string
-// 
-// How to store the converted value?
-// %c - just one char string
-// %d - -2 147 483 648 to 2 147 483 647 ==> 11 chars at most
-// %f - FLT_DECIMAL_DIG + FLT_DIG + 2 ==> sign + number of digits + comma + number of digits after comma
-// %s - just store the pointer
-//
-// Then placing format_it is just as simple as strcpy'ing format_it to correct place
+/*
+		Internal functions definition
+*/
+
+bool is_format(const char* restrict format, char c) {
+	assert(format);
+	if (format[0] != '%') {
+		return false;
+	}
+
+	return format[0] == '%' && format[1] == c;
+}
+
+size_t count_number_of_arguments(const char* format) {
+	assert(format);
+
+	size_t counted_args = 0;
+	const char* format_it = format;
+	while (*format_it) {
+		if (*format_it != '%') {
+			format_it++;
+			continue;
+		}
+
+		if (is_format(format_it, 'c') || 
+			is_format(format_it, 'd') || 
+			is_format(format_it, 'f') ) {
+			counted_args++;
+			format_it += 2;
+			continue;
+		}
+
+		// Ignore '%%'
+		if (is_format(format_it, '%')) {
+			format_it += 2;
+			continue;
+		}
+
+		// Case when format looks like "Misplaced %"
+		if (is_format(format_it, '\0')) {
+			REPORT_ERROR("misplaced %% at the end of the format string");
+			return -1;
+		}
+	}
+
+	return counted_args;
+}
+
+size_t count_number_of_double_percents(const char* format) {
+	assert(format);
+	size_t count = 0;
+
+	const char* format_it = format;
+	while (*format_it) {
+		if (is_format(format_it, '%')) {
+			count++;
+			format_it += 2;
+		} else {
+			format_it++;
+		}
+	}
+
+	return count;
+}

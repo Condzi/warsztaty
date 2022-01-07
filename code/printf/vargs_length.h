@@ -1,6 +1,8 @@
 #ifndef VARAGS_LENGTH_H
 #define VARAGS_LENGTH_H
 
+#include <stdarg.h>
+
 #ifndef VA_ARGS_LENGTH_PRIV
 	#define VA_ARGS_LENGTH_PRIV(_1, _2, _3, _4, _5, _6, _7, _8, _N, ...) _N
 #endif // VA_ARGS_LENGTH_PRIV

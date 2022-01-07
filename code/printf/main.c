@@ -32,12 +32,14 @@ void test_charconv() {
 void test_my_printf() {
 	printf("PRINTF TEST -- SIMPLE\n");
 
-	my_printf("blah %%", 1);
-	my_printf("%c", 1, 'X');
-	my_printf("%d", 1, 123);
-	my_printf("%f", 1, 123.321f);
+	my_printf("blah %%\n", 1);
+	my_printf("%c\n", 1, 'X');
+	my_printf("%d\n", 1, 123);
+	my_printf("%f\n", 1, 123.321f);
 
 	printf("\nPRINTF TEST -- COMBINED\n");
-	// @ToDo: handle %% as %c with % as argument! or something. 
 	my_printf("Test: %d, %f, %c, %d. And finally, it works 100%% of the time :)\n", 4, 666, 21.37f, 'D', 997);
+
+	printf("\nPRINTF TEST -- COMBINED (macro)\n");
+	MY_PRINTF("Test: %d, %f, %c, %d. And finally, it works 100%% of the time :)\n", 666, 21.37f, 'D', 997);
 }
