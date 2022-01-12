@@ -10,9 +10,7 @@ int int_to_string(int32_t value, char* buffer) {
 	assert(buffer);
 
 	const bool has_sign = value < 0;
-
-	// To handle INT32_MIN case we have to promote to int64_t and then take the abs
-	const uint32_t absolute = (uint32_t)llabs((int64_t)value);
+	const uint32_t absolute = value*(has_sign?(-1):(1));
 
 	size_t num_of_digits = 0;
 	uint32_t temp = absolute;
@@ -28,7 +26,7 @@ int int_to_string(int32_t value, char* buffer) {
 		return 0;
 	}
 
-	size_t chars_to_write = num_of_digits + (int)has_sign;
+	const size_t chars_to_write = num_of_digits + (int)has_sign;
 	temp = absolute;
 	for (size_t i = chars_to_write - 1; i < chars_to_write; i--) {
 		buffer[i] = temp%10 + '0';
