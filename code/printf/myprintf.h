@@ -16,7 +16,7 @@ int my_printf(const char* restrict format, size_t num_va_args, ...);
 /*
  * Wrapper for `my_printf` which automatically deduces number of variadic arguments
 */
-#ifndef MY_PRINTF
-	#define MY_PRINTF(format, ...) my_printf(format, VA_ARGS_LENGTH(__VA_ARGS__), __VA_ARGS__)
+#ifndef my_printf
+	#define my_printf(format, ...) my_printf(format, VA_ARGS_LENGTH(__VA_ARGS__), __VA_ARGS__)
 #endif // MYPRINTF
 #endif // MYPRINTF_H

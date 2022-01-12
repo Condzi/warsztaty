@@ -33,6 +33,8 @@ typedef struct Formated_Argument_ {
 		Public functions definition
 */
 
+#undef my_printf
+
 // 1. Iterate over entire format
 // 2. Confirm that num of % = num of varargs
 // 3. Parse varargs
@@ -93,28 +95,38 @@ int my_printf(const char* restrict format, size_t num_va_args, ...) {
 		// redundant code.
 		formated_arguments[current_arg_idx].string = arg_string_buffer;
 
-		if (*format_it == 'c') {
-			const char arg_raw = (char)va_arg(args, int);
+		switch (*format_it) {
+			case '%': {
+				arg_string_buffer[0] = '%';
+				arg_string_buffer[1] = '\0';
+			} break;
 
-			arg_string_buffer[0] = arg_raw;
-			arg_string_buffer[1] = '\0';
-		} else if (*format_it == 'd') {
-			const int arg_raw = va_arg(args, int);
+			case 'c': {
+				const char arg_raw = (char)va_arg(args, int);
 
-			if (int_to_string(arg_raw, arg_string_buffer) == 0) {
-				strcpy(arg_string_buffer, "<error>");
-			}
-		} else if (*format_it == 'f') {
-			const float arg_raw = (float)va_arg(args, double);
+				arg_string_buffer[0] = arg_raw;
+				arg_string_buffer[1] = '\0';
+			} break;
 
-			if (float_to_string(arg_raw, arg_string_buffer) == 0) {
-				strcpy(arg_string_buffer, "<error>");
-			}
-		} else if (*format_it == '%') {
-			arg_string_buffer[0] = '%';
-			arg_string_buffer[1] = '\0';
-		} else if (*format_it == 's') {
-			formated_arguments[current_arg_idx].string = va_arg(args, const char*);
+			case 'd': {
+				const int arg_raw = va_arg(args, int);
+
+				if (int_to_string(arg_raw, arg_string_buffer) == 0) {
+					strcpy(arg_string_buffer, "<error>");
+				}
+			} break;
+
+			case 'f': {
+				const float arg_raw = (float)va_arg(args, double);
+
+				if (float_to_string(arg_raw, arg_string_buffer) == 0) {
+					strcpy(arg_string_buffer, "<error>");
+				}
+			} break;
+
+			case 's': {
+				formated_arguments[current_arg_idx].string = va_arg(args, const char*);
+			} break;
 		}
 		
 		length_of_all_strings_used_for_agruments += strlen(formated_arguments[current_arg_idx].string);

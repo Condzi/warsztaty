@@ -48,19 +48,16 @@ void test_charconv() {
 void test_my_printf() {
 	puts("\ntest_my_printf: simple");
 	{
-		my_printf(" (the next 5 lines fail on purpose)\n", 0);
-		my_printf(" blah %%\n", 1);
-		my_printf(" %\n", 1);
-		my_printf("%", 1);
-		my_printf(" %c\n", 1, 'X');
-		my_printf(" %d\n", 1, 123);
-		my_printf(" %f\n", 1, 123.321f);
-		my_printf(" %s", 1, "a string\n");
+		my_printf(" (the next 5 lines fail on purpose)%s", "\n");
+		my_printf(" blah %%\n", 321);
+		my_printf(" %\n", 123);
+		my_printf("%");
+		my_printf(" %c\n", 'X');
+		my_printf(" %d\n", 123);
+		my_printf(" %f\n", 123.321f);
+		my_printf(" %s", "a string\n");
 	}
 
 	puts("\ntest_my_printf: combined");
-	my_printf(" Test: %d, %f, %c, %d. And finally, it works 100%% of the time %s!\n", 5, 666, 21.37f, 'D', 997, ":)");
-
-	puts("\ntest_my_printf: combined, using macro");
-	MY_PRINTF(" Test: %d, %f, %c, %d. And finally, it works 100%% of the time %s!\n", 666, 21.37f, 'D', 997, ":)");
+	my_printf(" Test: %d, %f, %c, %d. And finally, it works 100%% of the time %s!\n", 666, 21.37f, 'D', 997, ":)");
 }
