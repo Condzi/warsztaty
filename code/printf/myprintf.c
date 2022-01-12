@@ -14,7 +14,6 @@
 		Internal stuff declaration
 */
 
-bool is_format(const char* restrict format, char c);
 size_t count_number_of_arguments(const char* format);
 size_t count_number_of_double_percents(const char* format);
 
@@ -86,41 +85,42 @@ int my_printf(const char* restrict format, size_t num_va_args, ...) {
 		if (*format_it != '%') {
 			format_it++;
 			continue;
-		} 
+		}
+		format_it++;
 
 		char* arg_string_buffer = formated_arguments[current_arg_idx].buffer;
 		// In every case besides '%s', string points to the buffer, so we set it here to avoid
 		// redundant code.
 		formated_arguments[current_arg_idx].string = arg_string_buffer;
 
-		if (is_format(format_it, 'c')) {
+		if (*format_it == 'c') {
 			const char arg_raw = (char)va_arg(args, int);
 
 			arg_string_buffer[0] = arg_raw;
 			arg_string_buffer[1] = '\0';
-		} else if (is_format(format_it, 'd')) {
+		} else if (*format_it == 'd') {
 			const int arg_raw = va_arg(args, int);
 
 			if (int_to_string(arg_raw, arg_string_buffer) == 0) {
 				strcpy(arg_string_buffer, "<error>");
 			}
-		} else if (is_format(format_it, 'f')) {
+		} else if (*format_it == 'f') {
 			const float arg_raw = (float)va_arg(args, double);
 
 			if (float_to_string(arg_raw, arg_string_buffer) == 0) {
 				strcpy(arg_string_buffer, "<error>");
 			}
-		} else if (is_format(format_it, '%')) {
+		} else if (*format_it == '%') {
 			arg_string_buffer[0] = '%';
 			arg_string_buffer[1] = '\0';
-		} else if (is_format(format_it, 's')) {
+		} else if (*format_it == 's') {
 			formated_arguments[current_arg_idx].string = va_arg(args, const char*);
 		}
 		
 		length_of_all_strings_used_for_agruments += strlen(formated_arguments[current_arg_idx].string);
-		formated_arguments[current_arg_idx].offset_in_format = (size_t)format_it - (size_t)format;
+		formated_arguments[current_arg_idx].offset_in_format = (size_t)(format_it - 1) - (size_t)format;
 		current_arg_idx++;
-		format_it += 2;
+		format_it++;
 	}
 
 	va_end(args);
@@ -193,15 +193,6 @@ int my_printf(const char* restrict format, size_t num_va_args, ...) {
 		Internal functions definition
 */
 
-bool is_format(const char* restrict format, char c) {
-	assert(format);
-	if (format[0] != '%') {
-		return false;
-	}
-
-	return format[0] == '%' && format[1] == c;
-}
-
 size_t count_number_of_arguments(const char* format) {
 	assert(format);
 
@@ -213,30 +204,28 @@ size_t count_number_of_arguments(const char* format) {
 			continue;
 		}
 
-		if (is_format(format_it, 'c') || 
-			is_format(format_it, 'd') || 
-			is_format(format_it, 'f') ||
-			is_format(format_it, 's')) {
-			counted_args++;
-			format_it += 2;
-			continue;
+		format_it++;
+		switch (*format_it) {
+			case 'c':
+			case 'd':
+			case 'f':
+			case 's': {
+				counted_args++;
+			} break;
+
+			case '%': break; // ignore %%
+
+			case '\0': {
+				REPORT_ERROR("misplaced %% at the end of the format string");
+				return -1;
+			}
+
+			default: {
+				REPORT_ERROR("unknown format argument");
+			}
 		}
 
-		// Ignore '%%'
-		if (is_format(format_it, '%')) {
-			format_it += 2;
-			continue;
-		}
-
-		// Case when format looks like "Misplaced %"
-		if (is_format(format_it, '\0')) {
-			REPORT_ERROR("misplaced %% at the end of the format string");
-			return -1;
-		}
-
-		// If none of the above, it's just an unknown format
-		REPORT_ERROR("unknown format argument");
-		format_it += 2;
+		format_it++;
 	}
 
 	return counted_args;
@@ -248,7 +237,7 @@ size_t count_number_of_double_percents(const char* format) {
 
 	const char* format_it = format;
 	while (*format_it) {
-		if (is_format(format_it, '%')) {
+		if (format_it[0] == '%' && format_it[1] == '%') {
 			count++;
 			format_it += 2;
 		} else {
