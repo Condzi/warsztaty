@@ -14,8 +14,19 @@
 		Internal stuff declaration
 */
 
-size_t count_number_of_arguments(const char* format);
-size_t count_number_of_double_percents(const char* format);
+/*
+ * Counts number of argument specifiers (%s, %d, %f, %c)
+ * @param[in] format - string with following specifiers: %d -- int32_t, %f -- float, %c -- int8_t/char, %s -- NULL-terminated string, %% -- percent sign
+ * @return number of occurences of format specifiers
+*/
+static size_t count_number_of_arguments(const char* format);
+
+/*
+ * Counts number of "%%" -- it's a special case of formating specifier.
+ * @param[in] format - string with following specifiers: %d, %f, %c, %s, %%
+ * @return number of occurences of format specifiers
+*/
+static size_t count_number_of_double_percents(const char* format);
 
 enum {
 	// + 1 for \0
@@ -205,7 +216,7 @@ int my_printf(const char* restrict format, size_t num_va_args, ...) {
 		Internal functions definition
 */
 
-size_t count_number_of_arguments(const char* format) {
+static size_t count_number_of_arguments(const char* format) {
 	assert(format);
 
 	size_t counted_args = 0;
@@ -243,7 +254,7 @@ size_t count_number_of_arguments(const char* format) {
 	return counted_args;
 }
 
-size_t count_number_of_double_percents(const char* format) {
+static size_t count_number_of_double_percents(const char* format) {
 	assert(format);
 	size_t count = 0;
 
