@@ -45,8 +45,10 @@ int int_to_string(int32_t value, char* buffer) {
 int float_to_string(float value, char* buffer) {
 	assert(buffer);
 	
-	const int32_t integer = (int32_t)value;
-	const int32_t fraction = abs((int32_t)((value - (float)integer)*powf(10, FLT_DIG)));
+
+	float integer_f;
+	const int32_t fraction = abs((int32_t)(modff(value, &integer_f)*powf(10, FLT_DIG)));
+	const int32_t integer = (int32_t)(integer_f);
 
 	int chars_written = 0;
 
